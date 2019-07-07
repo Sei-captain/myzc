@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        https://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context
+        https://www.springframework.org/schema/context/spring-context.xsd
+        http://www.springframework.org/schema/mvc
+        https://www.springframework.org/schema/mvc/spring-mvc.xsd http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd">
+
+    <context:component-scan base-package="com.sei.*" use-default-filters="false">
+        <context:include-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
+    </context:component-scan>
+
+    <!-- 启用注解功能 ，当使用 <context:component-scan/> 后，就可以将 <context:annotation-config/> 移除了-->
+    <!--<context:annotation-config />-->
+
+   <!-- 配置注解处理映射
+    <bean class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping"/>
+    &lt;!&ndash;配置适配器&ndash;&gt;
+    <bean class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter">
+        <property name="messageConverters" >
+            <list>&lt;!&ndash;配置json转换器，使用jackson转换&ndash;&gt;
+                <bean class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter">
+                    <property name="supportedMediaTypes">
+                        <list>
+                            <value>text/html;charset=UTF-8</value>
+                        </list>
+                    </property>
+                </bean>
+            </list>
+        </property>
+    </bean>-->
+
+    <!-- 使用 mvc:annotation-driven可以代替上面注解映射器和注解适配器配置
+    mvc:annotation-driven默认加载了很多的参数绑定方法，比如json转换解析器就默认加载了
+    实际开发中使用mvc:annotation-driven-->
+    <!-- 注解驱动：配置处理器映射器和适配器 -->
+    <mvc:annotation-driven />
+
+<!--    <bean id="exceptionResolver"   class="org.springframework.web.servlet.handler.SimpleMappingExceptionResolver">
+    	&lt;!&ndash; <property name="exceptionAttribute" value="exception"/>  &ndash;&gt;&lt;!&ndash; 异常解析器捕获异常后,会将异常对象存放到request域.属性名称默认为:exception &ndash;&gt;
+        <property name="exceptionMappings">
+            <props>            	
+                <prop key="java.lang.Exception">error/error</prop>
+                <prop key="com.atguigu.atcrowdfunding.exception.LoginFailException">login</prop>
+            </props>  
+        </property>  
+    </bean>-->
+
+
+    <!-- 配置文件上传，如果没有使用文件上传可以不用配置，当然如果不配，那么配置文件中也不必引入上传组件包 -->
+    <bean id="multipartResolver"
+          class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+        <!-- 默认编码 -->
+        <property name="defaultEncoding" value="utf-8" />
+        <!-- 文件大小最大值 -->
+        <property name="maxUploadSize" value="10485760000" />
+        <!-- 内存中的最大值 -->
+        <property name="maxInMemorySize" value="40960" />
+        <!-- 启用是为了推迟文件解析，以便捕获文件大小异常 -->
+        <property name="resolveLazily" value="true"/>
+    </bean>
+
+    <!-- 声明拦截器对象-->
+<!--    <mvc:interceptors>
+    	<bean id="loginInterceptor" class="com.atguigu.atcrowdfunding.interceptor.LoginInterceptor"></bean>
+    	<bean id="authInterceptor" class="com.atguigu.atcrowdfunding.interceptor.AuthInterceptor"></bean>
+    </mvc:interceptors>-->
+
+    <!--视图解析器-->
+    <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+        <property name="viewClass" value="org.springframework.web.servlet.view.JstlView"></property>
+        <property name="prefix" value="/WEB-INF/jsp/"></property>
+        <property name="suffix" value=".jsp"></property>
+    </bean>
+
+    <!--shiro开启controller 注解权限控制-->
+    <!--<aop:config proxy-target-class="true"></aop:config>
+    <bean class="org.apache.shiro.spring.security.interceptor.AuthorizationAttributeSourceAdvisor">
+        <property name="securityManager" ref="securityManager"/>
+    </bean>-->
+
+
+   <!-- 处理异常跳转指定页面-->
+  <!-- <bean
+            class="org.springframework.web.servlet.handler.SimpleMappingExceptionResolver">
+        <property name="exceptionMappings">
+            <props>
+                &lt;!&ndash; 这里你可以根据需要定义N多个错误异常转发 &ndash;&gt;
+                <prop key="org.apache.shiro.authz.UnauthorizedException">redirect:/unauthorized.jsp</prop>
+                <prop key="org.apache.shiro.authz.UnauthenticatedException">redirect:/nons/noAuth.html</prop>
+                <prop key="java.lang.IllegalArgumentException">/redirect:/anons/bizError.html</prop>  &lt;!&ndash; 参数错误(bizError.jsp) &ndash;&gt;
+                <prop key="java.lang.Exception">/redirect:/unknowError.html</prop>  &lt;!&ndash; 其他错误为'未定义错误'(unknowError.jsp) &ndash;&gt;
+            </props>
+        </property>
+    </bean>-->
+
+</beans>

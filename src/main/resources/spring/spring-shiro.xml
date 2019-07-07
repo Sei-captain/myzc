@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd">
+
+
+    <!-- 配置Shiro核心Filter，id必须和web.xml中的DelegatingFilterProxy <filter-name>一致  -->
+    <bean id="shiroFilter" class="org.apache.shiro.spring.web.ShiroFilterFactoryBean">
+        <!-- 安全管理器 -->
+        <property name="securityManager" ref="securityManager" />
+        <!-- 未认证，跳转到哪个页面  -->
+        <property name="loginUrl" value="/login.do" />
+        <!-- 认证成功跳转页面，一般不配置 -->
+        <!--<property name="successUrl" value="/index.jsp" />-->
+        <!-- 认证后，没有权限跳转页面 -->
+        <property name="unauthorizedUrl" value="/unauthorized.jsp" />
+        <!-- shiro URL控制过滤器规则  -->
+        <property name="filterChainDefinitions">
+            <value>
+                <!--请求logout.do shiro会清除session-->
+                /logout.do = logout
+                /user/* = authc
+                /role/* = authc
+                /permission/* = authc
+                /user/* = perms[user]
+                /role/* = perms[role]
+                /permission/* = perms[permission]
+                /** = anon
+            </value>
+        </property>
+    </bean>
+
+    <!-- 安全管理器  -->
+    <bean id="securityManager" class="org.apache.shiro.web.mgt.DefaultWebSecurityManager">
+        <property name="cacheManager" ref="cacheManager" />
+        <property name="sessionManager" ref="sessionManager"/>
+        <property name="rememberMeManager" ref="rememberMeManager"/>
+        <property name="realm" ref="realmCustom" />
+        <!--多个realm时
+        <property name="authenticator" ref="authenticator" />
+         <property name="realms">
+            <list>
+                <ref bean="firseRealm"/>
+                <ref bean="secondRealm"/>
+            </list>
+        </property> -->
+    </bean>
+    <!--    多个realm时配置为authenticator，然后交给securityManager管理
+    <bean id="authenticator" class="org.apache.shiro.authc.pam.ModularRealmAuthenticator">
+
+         多个realm时，配置认证策略，只要有一个Realm认证成功即可，并且返回所有认证成功信息
+        <property name="authenticationStrategy">
+            <bean class="org.apache.shiro.authc.pam.AtLeastOneSuccessfulStrategy"></bean>
+        </property>
+    </bean>-->
+
+
+
+    <!-- 缓存管理器 使用Ehcache实现 -->
+    <bean id="cacheManager" class="org.apache.shiro.cache.ehcache.EhCacheManager">
+        <property name="cacheManagerConfigFile" value="classpath:shiro/ehcache.xml" />
+    </bean>
+
+    <!-- 配置Realm,设定核对密码时在加盐后，要用MD5算法对用户输入的密码加密3次用于核对 -->
+    <bean id="realmCustom" class="com.sei.util.RealmCustom">
+        <!-- 缓存区的名字 就是 ehcache.xml 自定义 cache的name -->
+        <property name="authorizationCacheName" value="shirocache" />
+        <property name="credentialsMatcher">
+            <bean class="org.apache.shiro.authc.credential.HashedCredentialsMatcher">
+                <!-- 指定加密方式MD5，SHA1等 -->
+                <property name="hashAlgorithmName" value="MD5"></property>
+                <!-- 指定加密次数 -->
+                <property name="hashIterations" value="3"></property>
+            </bean>
+        </property>
+    </bean>
+
+    <!--会话管理器-->
+    <bean id="sessionManager" class="org.apache.shiro.web.session.mgt.DefaultWebSessionManager">
+        <!--session的失效时间，单位毫秒-->
+        <property name="globalSessionTimeout" value="1800000"/>
+        <!--删除失效session-->
+        <property name="deleteInvalidSessions" value="true"/>
+    </bean>
+
+    <!--remember管理器，写cookie，取cookie生成用户信息-->
+    <bean id="rememberMeManager" class="org.apache.shiro.web.mgt.CookieRememberMeManager">
+        <property name="cookie" ref="rememberMeCookie"/>
+    </bean>
+    <!--记住我cookie-->
+    <bean id="rememberMeCookie" class="org.apache.shiro.web.servlet.SimpleCookie">
+        <constructor-arg value="rememberMe"/><!--cookie名为remember-->
+        <property name="maxAge" value="2592000"/><!--cookie生效时间30天，单位秒-->
+    </bean>
+
+<!--    <bean id="lifecycleBeanPostProcessor" class="org.apache.shiro.spring.LifecycleBeanPostProcessor"/>
+
+    &lt;!&ndash; 开启shiro注解模式 ，必须配置lifecycleBeanPostProcessor之后才可以使用 &ndash;&gt;
+    <bean class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator" depends-on="lifecycleBeanPostProcessor" >
+        <property name="proxyTargetClass" value="true" />
+    </bean>
+
+    <bean class="org.apache.shiro.spring.security.interceptor.AuthorizationAttributeSourceAdvisor">
+        <property name="securityManager" ref="securityManager"/>
+    </bean>-->
+
+</beans>

@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.sei.dao.PermissionDao">
+
+    <resultMap id="permissionMap" type="com.sei.bean.Permission">
+        <id column="id" property="id" jdbcType="INTEGER" />
+        <result column="pid" property="pid" jdbcType="INTEGER" />
+        <result column="name" property="name" jdbcType="VARCHAR" />
+        <result column="icon" property="icon" jdbcType="VARCHAR" />
+        <result column="url" property="url" jdbcType="VARCHAR" />
+    </resultMap>
+
+    <select id="queryAllPermission"  resultMap="permissionMap">
+        select * from t_permission
+    </select>
+    <select id="queryPermissionById" resultMap="permissionMap">
+        select * from t_permission where id=#{id}
+    </select>
+    <select id="queryIcon" resultType="icon">
+        select * from t_icon
+    </select>
+
+    <select id="queryPermissionIdByRoleId" resultType="int">
+        select permissionid from t_role_permission where roleid=#{id}
+    </select>
+    <insert id="addPermission">
+        insert into t_permission values (#{id,jdbcType=INTEGER},#{pid,jdbcType=INTEGER},
+		#{name,jdbcType=VARCHAR},#{icon,jdbcType=VARCHAR},#{url,jdbcType=VARCHAR})
+    </insert>
+
+    <insert id="addPermissionIdByRoleId">
+        insert into t_role_permission(roleid,permissionid) values (#{roleid},#{permissionid})
+    </insert>
+    <update id="updatePermission">
+        update t_permission set name=#{name},icon=#{icon},url=#{url} where id = #{id}
+    </update>
+    <delete id="deletePermission" >
+        delete from t_permission where id=#{id}
+    </delete>
+    <delete id="deletePermissionIdByRoleId">
+        delete from t_role_permission where roleid=#{id}
+    </delete>
+
+    <delete id="deleteRoleIdByPermissionId">
+        delete from t_role_permission where permissionid=#{id}
+    </delete>
+</mapper>

@@ -1,0 +1,35 @@
+var options = {  
+   target: '#output',          //�ѷ��������ص����ݷ���idΪoutput��Ԫ����      
+   beforeSubmit: showRequest,  //�ύǰ�Ļص�����  
+   success: showResponse,      //�ύ��Ļص�����  
+   //url: url,                 //Ĭ����form��action�� �����������Ḳ��  
+   //type: type,               //Ĭ����form��method��get or post���������������Ḳ��  
+   //dataType: null,           //html(Ĭ��), xml, script, json...���ܷ���˷��ص�����  
+   //clearForm: true,          //�ɹ��ύ��������б�Ԫ�ص�ֵ  
+   //resetForm: true,          //�ɹ��ύ���������б�Ԫ�ص�ֵ  
+   timeout: 3000               //���������ʱ�䣬���������3�����������  
+}  
+  
+function showRequest(formData, jqForm, options){  
+   //formData: ��������ύ��ʱ��Form�������Ajax��ʽ�Զ��ύ��Щ���ݣ���ʽ�磺[{rolename:user,value:val },{rolename:pwd,value:pwd}]
+   //jqForm:   jQuery���󣬷�װ�˱���Ԫ��     
+   //options:  options����  
+   var queryString = $.param(formData);   //rolename=1&address=2
+   var formElement = jqForm[0];              //��jqFormת��ΪDOM����  
+   var address = formElement.address.value;  //����jqForm��DOMԪ��  
+   return true;  //ֻҪ������false���������ύ,��������ԶԱ�Ԫ�ؽ�����֤  
+};  
+  
+function showResponse(responseText, statusText){  
+   //dataType=xml  
+   var rolename = $('rolename', responseXML).text();
+   var address = $('address', responseXML).text();  
+   $("#xmlout").html(rolename + "  " + address);
+   //dataType=json  
+   $("#jsonout").html(data.rolename + "  " + data.address);
+};
+
+$("#formID").ajaxSubmit(options);
+
+
+

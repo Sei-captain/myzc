@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.sei.dao.UserDao">
+
+    <resultMap id="userMap" type="com.sei.bean.User">
+        <id column="id" property="id" jdbcType="INTEGER" />
+        <result column="loginacct" property="loginacct" jdbcType="VARCHAR" />
+        <result column="userpswd" property="userpswd" jdbcType="CHAR" />
+        <result column="username" property="username" jdbcType="VARCHAR" />
+        <result column="email" property="email" jdbcType="VARCHAR" />
+        <result column="createtime" property="createtime" jdbcType="CHAR" />
+    </resultMap>
+
+    <select id="queryAccount" resultMap="userMap">
+        select * from t_user where loginacct=#{loginacct}
+    </select>
+    <select id="queryUser"  resultMap="userMap">
+        select * from t_user
+        <where>
+            <if test="queryText!=null">loginacct like concat("%",#{queryText},"%")</if>
+        </where>
+        order by createtime desc
+    </select>
+    <select id="queryUserById" resultMap="userMap">
+        select * from t_user where id=#{id}
+    </select>
+    <select id="queryPermissionByUserid" resultType="permission">
+        select distinct tp.* from t_permission tp
+        join t_role_permission trp on tp.id = trp.permissionid
+        join t_user_role tur on trp.roleid = tur.roleid
+        join t_user tu on tur.userid = tu.id
+        where tu.id=#{id};
+    </select>
+
+    <insert id="addUser" parameterType="user">
+        insert into t_user(loginacct, userpswd,username, email, createtime)
+        values (#{loginacct},#{userpswd},#{username},#{email}, #{createtime})
+    </insert>
+    <insert id="addUserRole" >
+        insert into t_user_role(userid,roleid) values (#{userid},#{roleid})
+    </insert>
+    <delete id="deleteUserRole">
+        delete from t_user_role where userid=#{userid} and roleid=#{roleid}
+    </delete>
+    <delete id="deleteUser" >
+        delete from t_user where id=#{id}
+    </delete>
+    <update id="doUpdateUser" parameterType="user">
+        update t_user set
+		loginacct = #{loginacct,jdbcType=VARCHAR},
+		username = #{username,jdbcType=VARCHAR},
+		email = #{email,jdbcType=VARCHAR}
+		where id = #{id,jdbcType=INTEGER}
+    </update>
+    <delete id="deleteRoleIdByUserId">
+        delete from t_user_role where userid=#{userid}
+    </delete>
+
+
+</mapper>
